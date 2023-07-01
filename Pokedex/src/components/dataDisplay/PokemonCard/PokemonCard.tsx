@@ -1,6 +1,18 @@
 import { PokemonClient, Pokemon } from "pokenode-ts";
-import { useState, useEffect } from "react";
-import { TouchableOpacity, View, StyleSheet, Text, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  TouchableOpacity,
+  View,
+  StyleSheet,
+  Text,
+  Image,
+  Dimensions,
+} from "react-native";
+
+// TODO: Move to constants
+const windowWidth = Dimensions.get("window").width;
+const imageWidth = windowWidth / 3 + 30;
+const imageHeight = windowWidth / 3;
 
 const PokemonCard = (props) => {
   const { pokemon, navigation } = props;
@@ -27,6 +39,26 @@ const PokemonCard = (props) => {
       .finally(() => setLoading(false));
   };
 
+  const sanitizeName = (name: string) => {
+    // TODO: Move to helper hook.
+    let fistLetter = name.slice(0, 1);
+
+    return fistLetter.toUpperCase() + name.substring(1, name.length);
+  };
+
+  const sanitizePokemonId = (id: string) => {
+    switch (id?.length) {
+      case 1:
+        return `00${id}`;
+
+      case 2:
+        return `0${id}`;
+
+      default:
+        return id;
+    }
+  };
+
   useEffect(() => {
     loadPokemonData();
   }, []);
@@ -38,17 +70,23 @@ const PokemonCard = (props) => {
       ) : (
         <View style={styles.pokeCard}>
           <Text style={{ fontWeight: "bold", textAlign: "center" }}>
-            {name}
+            {sanitizeName(name)}
           </Text>
-          <Text>#{cardData?.id}</Text>
+          <Text>#{sanitizePokemonId(cardData?.id.toString())}</Text>
           <Image
             source={{
               uri: `${cardData?.sprites.front_default}`,
             }}
-            style={{ width: 200, height: 200 }}
+            style={styles.image}
           />
+          {/* {cardData?.types.map((type) => (
+            <Text style={{ margin: 5 }}>{sanitizeName(type.type.name)}</Text>
+          ))} */}
           {cardData?.types.map((type) => (
-            <Text style={{ margin: 5 }}>{type.type.name}</Text>
+            <PokemonTypeBanner
+              name={sanitizeName(type.type.name)}
+              color="red"
+            />
           ))}
         </View>
       )}
@@ -56,11 +94,45 @@ const PokemonCard = (props) => {
   );
 };
 
+const PokemonTypeBanner = (props) => {
+  const { name, color } = props;
+
+  return (
+    <View
+      style={{
+        backgroundColor: "#FC8583",
+        width: "43%",
+        alignItems: "center",
+        margin: 1,
+        borderRadius: 10,
+      }}
+    >
+      <Text>{name}</Text>
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
   pokeCard: {
+    borderColor: "#69D149",
+    borderWidth: 2,
+    margin: 5,
+    borderRadius: 10,
+    backgroundColor: "#49D0B0",
+  },
+  child: {
+    width: windowWidth / 2,
+    alignItems: "center",
+    height: imageHeight + 5,
+    marginTop: 10,
+
     borderColor: "red",
     borderWidth: 2,
     margin: 5,
+  },
+  image: {
+    width: imageWidth,
+    height: imageHeight,
   },
 });
 

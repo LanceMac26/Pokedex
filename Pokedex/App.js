@@ -1,10 +1,11 @@
-import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Button } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LandingPage from "./src/pages/LandingPage/LandingPage";
 import DetailPage from "./src/pages/DetailPage/DetailPage";
 import PokemonService from "./src/services/pokemonService";
+
+// TODO: Investigate the implementation of a Splash Screen
 
 const Stack = createNativeStackNavigator();
 
@@ -35,7 +36,10 @@ export default function App() {
           <Stack.Screen
             name="DetailPage"
             component={DetailPage}
-            options={{ title: "Search" }}
+            options={{
+              title: "Search",
+              headerShown: false,
+            }}
           />
         </Stack.Navigator>
       </NavigationContainer>

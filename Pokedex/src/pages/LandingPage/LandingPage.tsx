@@ -49,34 +49,17 @@ function LandingPage({ navigation }) {
       {loading ? (
         <Text>Loading....</Text>
       ) : (
-        <ScrollView>
+        <ScrollView
+          contentContainerStyle={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+          }}
+        >
           {data?.map((pokemon) => (
             <PokemonCard pokemon={pokemon} navigation={navigation} />
           ))}
         </ScrollView>
-        // <FlatList
-        //   style={{ width: deviceWidth }}
-        //   data={data}
-        //   numColumns={2}
-        //   renderItem={(pokemon) => (
-        //     <PokemonCard pokemon={pokemon.item} navigation={navigation} />
-        //   )}
-        // />
       )}
-
-      {/* <TextInput
-        style={styles.input}
-        onChangeText={setSearchString}
-        value={searchString}
-      />
-      <Button
-        title="Search"
-        onPress={() =>
-          navigation.navigate("DetailPage", {
-            searchString: searchString.toLocaleLowerCase().trim(),
-          })
-        }
-      /> */}
       <StatusBar />
     </View>
   );
