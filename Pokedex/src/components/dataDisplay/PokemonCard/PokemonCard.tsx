@@ -41,9 +41,9 @@ const PokemonCard = (props) => {
 
   const sanitizeName = (name: string) => {
     // TODO: Move to helper hook.
-    let fistLetter = name.slice(0, 1);
+    let fistLetter = name?.slice(0, 1);
 
-    return fistLetter.toUpperCase() + name.substring(1, name.length);
+    return fistLetter?.toUpperCase() + name?.substring(1, name.length);
   };
 
   const sanitizePokemonId = (id: string) => {

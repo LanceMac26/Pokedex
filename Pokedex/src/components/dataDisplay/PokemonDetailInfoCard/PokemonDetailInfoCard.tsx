@@ -5,8 +5,11 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  FlatList,
 } from "react-native";
 import type { PropsWithChildren } from "react";
+import * as Progress from "react-native-progress";
+import { FlatGrid, SimpleGrid } from "react-native-super-grid";
 
 enum ContainerTabs {
   ABOUT = "About",
@@ -57,7 +60,81 @@ const PreviewLayout = ({
 const AboutDetail = (props: { title: string; value: string }) => {
   const { title, value } = props;
 
-  return <Text>Asd</Text>;
+  return (
+    <View style={{ flex: 1, padding: 2, flexDirection: "row" }}>
+      <Text style={{ flex: 1, color: "#BDBEC2" }}>{title}</Text>
+      <Text style={{ flex: 2 }}>{value}</Text>
+    </View>
+  );
+};
+
+const BaseStatDetail = (props: {
+  base_stat: number;
+  effort: number;
+  stat: { name: string; url: string };
+}) => {
+  const { base_stat, stat } = props;
+  const titleArray = {
+    hp: { title: "HP", color: "#FE9999" },
+    attack: { title: "Attack", color: "#79BF94" },
+    defense: { title: "Defense", color: "#FE9999" },
+    "special-attack": { title: "Sp. Atk", color: "#79BF94" },
+    "special-defense": { title: "Sp. Def", color: "#79BF94" },
+    speed: { title: "Speed", color: "#FE9999" },
+  };
+
+  const sanitizeStatName = (name: string) => {
+    if (titleArray[name] !== undefined) {
+      return titleArray[name];
+    }
+
+    return { title: "Total", color: "#79BF94" };
+  };
+
+  return (
+    <View style={{ flex: 1, padding: 2, flexDirection: "row" }}>
+      <Text style={{ flex: 1, color: "#BDBEC2" }}>
+        {sanitizeStatName(stat.name).title}
+      </Text>
+      <Text style={{ flex: 2, color: "black", fontWeight: "bold" }}>
+        {base_stat}
+      </Text>
+      <Progress.Bar
+        style={{ flex: 3 }}
+        progress={base_stat / (stat.name == "Total" ? 600 : 100)}
+        width={200}
+        height={20}
+        color={sanitizeStatName(stat.name).color}
+      />
+    </View>
+  );
+};
+
+const MoveDetail = (props: { move: { name: string; url: string } }) => {
+  const { move } = props;
+
+  const sanitizeName = (name: string) => {
+    let splitName = name.split("-");
+    splitName.forEach(
+      (word) =>
+        (splitName[splitName.indexOf(word)] =
+          word.slice(0, 1).toUpperCase() + word.slice(1, word.length))
+    );
+
+    return splitName.join(" ");
+  };
+
+  return (
+    <Text
+      style={{
+        textAlign: "center",
+        alignContent: "center",
+        justifyContent: "space-around",
+      }}
+    >
+      {sanitizeName(move.name)}
+    </Text>
+  );
 };
 
 const PokemonDetailInfoCard = (props) => {
@@ -127,23 +204,28 @@ const PokemonDetailInfoCard = (props) => {
       {/* <AboutDetails */}
       {selectedTab == ContainerTabs.ABOUT && (
         <ScrollView>
-          {/* Extract to component */}
-          {/* <Text>Species: {pokemonDetail?.species.name}</Text>
-          <Text>Height: {sanitizeHeight(pokemonDetail?.height)}</Text>
-          <Text>Weight: {sanitizeWeight(pokemonDetail?.weight)}</Text>
-          <Text>Abilities: {sanitizeAbilities(pokemonDetail?.abilities)}</Text> */}
-          <AboutDetail title="Species" value={pokemonDetail?.species.name} />
-          <AboutDetail
-            title="Height"
-            value={sanitizeHeight(pokemonDetail?.height)}
-          />
-          <AboutDetail
-            title="Weight"
-            value={sanitizeWeight(pokemonDetail?.weight)}
-          />
-          <AboutDetail
-            title="Abilities"
-            value={sanitizeAbilities(pokemonDetail?.abilities)}
+          <FlatList
+            data={[
+              {
+                title: "Species",
+                value: sanitizeName(
+                  pokemonDetail?.species.name ? pokemonDetail?.species.name : ""
+                ),
+              },
+              { title: "Height", value: sanitizeHeight(pokemonDetail?.height) },
+              { title: "Weight", value: sanitizeWeight(pokemonDetail?.weight) },
+              {
+                title: "Abilities",
+                value: sanitizeAbilities(pokemonDetail?.abilities),
+              },
+            ]}
+            renderItem={({ item }) => (
+              <AboutDetail title={item.title} value={item.value} />
+            )}
+            keyExtractor={(item) => item.title}
+            numColumns={1}
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingVertical: 20 }}
           />
 
           <Text style={{ fontWeight: "bold", margin: "0,5" }}>Breeding</Text>
@@ -156,18 +238,33 @@ const PokemonDetailInfoCard = (props) => {
       {/* Base Stats */}
       {selectedTab === ContainerTabs.BASE_STATS && (
         <ScrollView>
-          <Text>Base Stats</Text>
           {/* Extract to component & map the stats array */}
-          <Text>HP: {pokemonDetail?.stats[0].base_stat}</Text>
-          <Text>Attack: {pokemonDetail?.stats[1].base_stat}</Text>
-          <Text>Defense: {pokemonDetail?.stats[2].base_stat}</Text>
-          <Text>Sp. Atk: {pokemonDetail?.stats[3].base_stat}</Text>
-          <Text>Sp. Def: {pokemonDetail?.stats[4].base_stat}</Text>
-          <Text>Speed: {pokemonDetail?.stats[5].base_stat}</Text>
-          <Text>Total: {calcTotalStats(pokemonDetail?.stats)}</Text>
+          <FlatList
+            data={[
+              ...pokemonDetail?.stats,
+              {
+                base_stat: calcTotalStats(pokemonDetail?.stats),
+                effort: 0,
+                stat: {
+                  name: "Total",
+                  url: "",
+                },
+              },
+            ]}
+            renderItem={({ item }) => (
+              <BaseStatDetail
+                base_stat={item.base_stat}
+                effort={item.effort}
+                stat={item.stat}
+              />
+            )}
+            keyExtractor={(item) => item.id}
+            numColumns={1}
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingVertical: 20 }}
+          />
 
-          <Text>""</Text>
-          <Text>Type Defenses</Text>
+          <Text style={{ fontWeight: "bold" }}>Type Defenses</Text>
           <Text>The effectiveness of each type on this Pokemon</Text>
         </ScrollView>
       )}
@@ -179,9 +276,15 @@ const PokemonDetailInfoCard = (props) => {
       {selectedTab === ContainerTabs.MOVES && (
         <ScrollView>
           {/* Extract to expanable component */}
-          {pokemonDetail?.moves.map((move) => (
-            <Text>{move.move.name}</Text>
-          ))}
+          <FlatList
+            data={pokemonDetail?.moves}
+            renderItem={({ item }) => <MoveDetail move={item.move} />}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            columnWrapperStyle={{ flex: 1, justifyContent: "space-around" }}
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingVertical: 20 }}
+          />
         </ScrollView>
       )}
 

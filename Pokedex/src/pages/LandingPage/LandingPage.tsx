@@ -10,6 +10,7 @@ import {
   Dimensions,
 } from "react-native";
 import PokemonCard from "../../components/dataDisplay/PokemonCard/PokemonCard";
+import * as Progress from "react-native-progress";
 
 interface CardResult {
   name: string;
@@ -47,7 +48,12 @@ function LandingPage({ navigation }) {
       <Text style={styles.titleText}>Pokedex</Text>
 
       {loading ? (
-        <Text>Loading....</Text>
+        <Progress.Circle
+          size={80}
+          indeterminate={true}
+          animated={true}
+          unfilledColor="white"
+        />
       ) : (
         <ScrollView
           contentContainerStyle={{
@@ -58,6 +64,18 @@ function LandingPage({ navigation }) {
           {data?.map((pokemon) => (
             <PokemonCard pokemon={pokemon} navigation={navigation} />
           ))}
+
+          {/* <FlatList
+            data={[...data, navigation]}
+            renderItem={(pokemon) => (
+              <PokemonCard pokemon={pokemon} navigation={null} />
+            )}
+            keyExtractor={(item) => item.name}
+            numColumns={2}
+            columnWrapperStyle={{ flex: 1, justifyContent: "space-around" }}
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingVertical: 20 }}
+          /> */}
         </ScrollView>
       )}
       <StatusBar />
